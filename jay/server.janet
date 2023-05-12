@@ -1,5 +1,4 @@
 #!/usr/bin/env janet
-(import spork/json :as json)
 (import jay)
 (import jay/lambda :as lambda)
 
