@@ -39,7 +39,7 @@
   `submit a marshal-base64-json success response`
   [event result]
   (let [headers {:content-type "application/json"
-                 :aws-request-id (event :aws-request-id)}
+                 :x-amzn-requestid (event :aws-request-id)}
         body (jay/encode-json result)]
     (success event headers body)))
 
