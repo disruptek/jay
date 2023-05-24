@@ -47,5 +47,5 @@
       {:ok {:headers headers :body result}} response
       js (json/decode result true true)]
   (assert (= (get js :statusCode) 400))
-  (assert (= (get js :errorType) "RuntimeError"))
+  (assert (= (get js :errorType) "CompileError"))
   (assert (= (get js :errorMessage) "could not find method :+ for \"a\"")))

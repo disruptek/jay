@@ -44,11 +44,20 @@
 
 (defn process-function
   `run the user's function and submit the marshalled result encoded as json`
-  [event function]
-  (try
-    (let [result (function)]
-      (send-result-as-json event result))
-    ([err] (failure event :code 400 :name "RuntimeError" :message err))))
+  [event thunk]
+  (match (protect (thunk))
+    [true thunk]
+    (do
+      (pp [:thunk thunk])
+      (match (protect (eval thunk))
+        [true result]
+        (do
+          (pp [:result result])
+          (send-result-as-json event result))
+        [false err]
+        (failure event :code 400 :name "RuntimeError" :message err)))
+    [false err]
+    (failure event :code 400 :name "CompileError" :message err)))
 
 (defn process-ast
   `compile and run the user's code, submitting a response as appropriate`
