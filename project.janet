@@ -12,5 +12,5 @@
 
 (declare-source
   :prefix "jay"
-  :source ["jay/init.janet"
+  :source ["jay/init.janet" "jay/server.janet"
            "jay/aws.janet" "jay/lambda.janet"])

@@ -28,7 +28,11 @@
   (assert (deep= (jay/decode (string (json/decode (js :body)))) data)
           "bad round-trip"))
 
-(assert (= 8 (jay/adhoc '(+ 3 5))))
+(assert (= 8 (jay/adhoc '(+ 3 5)))
+        "remote exec failed")
+
+(assert (= "side-effect" (jay/adhoc ''(string/join ["side" "effect"] "-")))
+        "result recover side-effect failed")
 
 (let [data '(+ "a" 3)
       encoded (string (jay/encode-json data))
@@ -38,3 +42,10 @@
   (assert (= (get js :statusCode) 400))
   (assert (= (get js :errorType) "CompileError"))
   (assert (= (get js :errorMessage) "could not find method :+ for \"a\"")))
+
+(assert (not (nil? (jay/adhoc '(os/getenv "JANET_PATH"))))
+        "expected a $JANET_PATH to be defined in jay's env")
+
+# make sure we can import jay
+(assert (nil? (jay/adhoc '(do (import jay) nil)))
+        "unable to import jay from inside jay")
