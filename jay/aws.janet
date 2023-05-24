@@ -1,9 +1,21 @@
 (import spork/base64 :as base64)
 (import curl)
 
-# will allow overriding these later
-(def aws_access_key_id (os/getenv "AWS_ACCESS_KEY_ID"))
-(def aws_secret_access_key (os/getenv "AWS_SECRET_ACCESS_KEY"))
+(defn default-credentials
+  []
+  @{:aws-access-key-id (os/getenv "AWS_ACCESS_KEY_ID")
+    :aws-secret-access-key (os/getenv "AWS_SECRET_ACCESS_KEY")
+    :aws-account-id (os/getenv "AWS_ACCOUNT_ID")
+    :aws-region (os/getenv "AWS_REGION")})
+
+(defn set-credentials
+  [&opt creds]
+  (default creds (default-credentials))
+  (let [current (dyn :aws-credentials @{})]
+    (setdyn :aws-credentials (merge current creds))))
+
+(defn get-region [] ((dyn :aws-credentials) :aws-region))
+(defn get-account-id [] ((dyn :aws-credentials) :aws-account-id))
 
 (defn explode-arn
   `decompose an arn into its parts`
@@ -87,6 +99,7 @@
     [data]
     (buffer/push preamble data))
 
+  (def creds (dyn :aws-credentials))
   (def handle (curl/easy/init))
   (:setopt handle
            :url url
@@ -101,8 +114,8 @@
            :copy-post-fields payload
            :accept-encoding "" # ie. all supported encodings
            :http-auth curl/http-auth-aws-sigv4
-           :username aws_access_key_id
-           :password aws_secret_access_key
+           :username (creds :aws-access-key-id)
+           :password (creds :aws-secret-access-key)
            :header-function eat-header
            :write-function eat-body)
   (match (:perform handle)
