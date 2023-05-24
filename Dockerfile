@@ -14,7 +14,7 @@ RUN \
 	rc-update add procfs boot && \
 	rc-update add sysfs boot && \
 	# various deps \
-	apk add git make linux-headers openssl-dev zlib-dev gcc bsd-compat-headers musl-dev coreutils && \
+	apk add hiredis hiredis-dev git make linux-headers openssl-dev zlib-dev gcc bsd-compat-headers musl-dev coreutils && \
 	# janet \
 	git clone https://github.com/janet-lang/janet.git && \
 	cd janet && \
@@ -35,7 +35,7 @@ COPY jay /jay/jay
 RUN cd /jay && make install && make bin/server && \
 	# take out the trash \
 	rm -rf /jay/jpm_tree/lib/.cache && \
-	apk del git make linux-headers openssl-dev zlib-dev gcc bsd-compat-headers musl-dev coreutils && \
+	apk del hiredis-dev git make linux-headers openssl-dev zlib-dev gcc bsd-compat-headers musl-dev coreutils && \
 	rm -rf /root/.cache
 
 # we'll set the entrypoint but let the user override the arguments
