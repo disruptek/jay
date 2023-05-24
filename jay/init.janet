@@ -19,7 +19,22 @@
 (defn encode-json [value] (json/encode (encode value)))
 (defn decode-json [value] (decode (json/decode value)))
 
-(defn- repr
-  `cast a value to a string`
-  [value]
-  (if (string? value) value (string/format "%q" value)))
+(defn jay-arn []
+  (string/format "arn:aws:lambda:%s:%s:function:jay"
+                 (aws/get-region) (aws/get-account-id)))
+
+(defmacro adhoc
+  [data]
+  (let [encoded (string (encode-json data))
+        arn (jay-arn)
+        response (aws/invoke-lambda-sync arn encoded)
+        {:ok {:headers headers :body result}} response
+        js (json/decode result true true)]
+    (match js
+      {:errorType ty :errorMessage msg}
+      (error (string/format "%s: %s" ty msg))
+      {:errorMessage msg}
+      (error msg)
+      legit
+      (let [result (decode-json (js :body))]
+        result))))

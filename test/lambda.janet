@@ -3,18 +3,12 @@
 (import jay/aws :as aws)
 (import jay)
 
-(def account (os/getenv "AWS_ACCOUNT_ID" nil))
-(assert account "define AWS_ACCOUNT_ID in your environment")
-
-(def region (os/getenv "AWS_REGION" nil))
-(assert account "define AWS_REGION in your environment")
-
-(def jay-arn
-  (string/format "arn:aws:lambda:%s:%s:function:jay" region account))
+(jay/aws/set-credentials)
+(def arn (jay/jay-arn))
 
 (let [data '{:hello "world"}
       encoded (string (jay/encode-json data))
-      response (aws/invoke-lambda-sync jay-arn encoded)
+      response (aws/invoke-lambda-sync arn encoded)
       {:ok {:headers headers :body result}} response
       request (aws/first-header response :x-amzn-requestid)
       end-request (string/format "END RequestId: %s" request)
@@ -34,16 +28,11 @@
   (assert (deep= (jay/decode (string (json/decode (js :body)))) data)
           "bad round-trip"))
 
-(let [data '(+ 3 5)
-      encoded (string (jay/encode-json data))
-      response (aws/invoke-lambda-sync jay-arn encoded)
-      {:ok {:headers headers :body result}} response
-      js (json/decode result true true)]
-  (assert (= 8 (jay/decode (string (json/decode (js :body)))))))
+(assert (= 8 (jay/adhoc '(+ 3 5))))
 
 (let [data '(+ "a" 3)
       encoded (string (jay/encode-json data))
-      response (aws/invoke-lambda-sync jay-arn encoded)
+      response (aws/invoke-lambda-sync arn encoded)
       {:ok {:headers headers :body result}} response
       js (json/decode result true true)]
   (assert (= (get js :statusCode) 400))
