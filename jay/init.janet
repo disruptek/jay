@@ -1,5 +1,6 @@
 (import spork/base64 :as base64)
 (import spork/json :as json)
+(import jay/aws :as aws :export true)
 
 #
 # temporary utilities for encoding/decoding
@@ -7,13 +8,13 @@
 
 (defn encode
   `encode a value to a string`
-  [x]
-  (base64/encode (marshal x)))
+  [value]
+  (base64/encode (marshal value)))
 
 (defn decode
   `decode a value from a string`
-  [x]
-  (unmarshal (base64/decode x)))
+  [value]
+  (unmarshal (base64/decode value)))
 
 (defn encode-json [value] (json/encode (encode value)))
 (defn decode-json [value] (decode (json/decode value)))
