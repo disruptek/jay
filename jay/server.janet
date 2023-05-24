@@ -21,7 +21,7 @@
                         :requestId request-id
                         :cookies nil # not yet
                         :multiValueHeaders nil # not yet
-                        :isBase64Encoded true
+                        #:isBase64Encoded true
                         :headers headers
                         :body body}))
 
