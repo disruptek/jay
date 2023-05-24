@@ -2,6 +2,7 @@ FROM "alpine"
 WORKDIR "/"
 
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV MAKE_OPTS="-j"
 
 RUN \
 	# sys reqs \
@@ -21,7 +22,6 @@ RUN \
 	make && \
 	make install && \
 	make install-jpm-git && \
-	jpm install spork && \
 	cd .. && \
 	rm -rf janet
 
@@ -29,16 +29,18 @@ RUN \
 RUN mkdir /jay
 COPY --chmod=644 project.janet /jay
 COPY --chmod=644 Makefile /jay
-RUN cd /jay && make deps
 COPY jay /jay/jay
 
-RUN cd /jay && make install && make bin/server && \
-	# take out the trash \
-	rm -rf /jay/jpm_tree/lib/.cache && \
+RUN cd /jay && \
+	make deps && \
+	make install && \
+	jpm --local quickbin /jay/jay/server.janet /jay/jpm_tree/bin/jay-server && \
+	jpm --local clear-cache && \
 	apk del hiredis-dev git make linux-headers openssl-dev zlib-dev gcc bsd-compat-headers musl-dev coreutils && \
 	rm -rf /root/.cache
 
 # we'll set the entrypoint but let the user override the arguments
 # so that we can avoid replacing the image except under exceptional
 # circumstances
-ENTRYPOINT ["/jay/bin/server"]
+# ENV JANET_PATH="/jay/jpm_tree/lib"
+ENTRYPOINT ["/jay/jpm_tree/bin/jay-server"]
