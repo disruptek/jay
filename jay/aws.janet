@@ -2,6 +2,7 @@
 (import curl)
 
 (defn default-credentials
+  `recover a default set of credentials from the process environment`
   []
   @{:aws-access-key-id (os/getenv "AWS_ACCESS_KEY_ID")
     :aws-secret-access-key (os/getenv "AWS_SECRET_ACCESS_KEY")
@@ -9,13 +10,27 @@
     :aws-region (os/getenv "AWS_REGION")})
 
 (defn set-credentials
+  `set the credentials to the given table with keys
+   like :aws-region, :aws-access-key-id, :aws-account-id`
   [&opt creds]
   (default creds (default-credentials))
   (let [current (dyn :aws-credentials @{})]
     (setdyn :aws-credentials (merge current creds))))
 
-(defn get-region [] ((dyn :aws-credentials) :aws-region))
-(defn get-account-id [] ((dyn :aws-credentials) :aws-account-id))
+(defn get-credentials []
+  `get the credentials, setting them to the defaults if necessary`
+  (var creds (dyn :aws-credentials @{}))
+  (if (empty? creds)
+    (set creds (set-credentials))
+    creds))
+
+(defn get-region
+  `recover the current region from the credentials`
+  [] ((get-credentials) :aws-region))
+
+(defn get-account-id
+  `recover the current account-id from the credentials`
+  [] ((get-credentials) :aws-account-id))
 
 (defn explode-arn
   `decompose an arn into its parts`
@@ -99,7 +114,7 @@
     [data]
     (buffer/push preamble data))
 
-  (def creds (dyn :aws-credentials))
+  (def creds (get-credentials))
   (def handle (curl/easy/init))
   (:setopt handle
            :url url
