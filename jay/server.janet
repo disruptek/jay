@@ -37,10 +37,13 @@
 (defn send-result-as-json
   `submit a marshal-base64-json success response`
   [event result]
-  (let [headers {:content-type "application/json"
-                 :x-amzn-requestid (event :aws-request-id)}
-        body (jay/encode-json result)]
-    (success event headers body)))
+  (match (protect (jay/encode-json result))
+    [true body]
+    (let [headers {:content-type "application/json"
+                   :x-amzn-requestid (event :aws-request-id)}]
+      (success event headers body))
+    [false err]
+    (failure event :code 500 :name "ValueError" :message err)))
 
 (defn process-function
   `run the user's function and submit the marshalled result encoded as json`
