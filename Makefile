@@ -6,10 +6,10 @@ install:
 	jpm $(opts) install
 
 image:
-	docker build --pull --tag $(tag) .
+	docker build --platform=linux/amd64 --pull --tag $(tag) .
 
 fresh:
-	docker build --pull --tag $(tag) --no-cache .
+	docker build --platform=linux/amd64 --pull --tag $(tag) --no-cache .
 
 push:
 	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(repository)
