@@ -1,6 +1,6 @@
 #!/usr/bin/env janet
 (import jay)
-(import jay/lambda :as lambda)
+(import jay/lambda)
 
 (defn- repr
   `cast a value to a string`

@@ -1,6 +1,6 @@
-(import spork/base64 :as base64)
-(import spork/json :as json)
-(import jay/aws :as aws :export true)
+(import spork/base64)
+(import spork/json)
+(import ./aws :export true)
 
 #
 # temporary utilities for encoding/decoding

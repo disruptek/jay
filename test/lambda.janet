@@ -1,7 +1,7 @@
-(import spork/json :as json)
-(import spork/base64 :as base64)
-(import jay/aws :as aws)
-(import jay)
+(import spork/json)
+(import spork/base64)
+(import ../jay/aws)
+(import ../jay)
 
 (jay/aws/set-credentials)
 (def arn (jay/jay-arn))

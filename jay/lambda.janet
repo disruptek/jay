@@ -1,4 +1,4 @@
-(import spork/json :as json)
+(import spork/json)
 (import curl)
 
 (defn get-runtime-context

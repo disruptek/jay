@@ -1,4 +1,4 @@
-(import spork/base64 :as base64)
+(import spork/base64)
 (import curl)
 
 (defn default-credentials
