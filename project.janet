@@ -7,6 +7,7 @@
   :dependencies ["https://github.com/andrewchambers/janet-redis"
                  "https://github.com/andrewchambers/janet-sh"
                  "https://github.com/disruptek/jurl"
+                 "https://github.com/janet-lang/jhydro"
                  "https://github.com/janet-lang/spork"]
   :version "0.0.0")
 
