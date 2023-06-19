@@ -6,8 +6,8 @@
   :repo "git+https://github.com/disruptek/jay.git"
   :dependencies ["https://github.com/andrewchambers/janet-redis"
                  "https://github.com/andrewchambers/janet-sh"
-                 "https://github.com/disruptek/jurl"
                  "https://github.com/janet-lang/jhydro"
+                 "https://github.com/sepisoad/jurl"
                  "https://github.com/janet-lang/spork"]
   :version "0.0.0")
 
