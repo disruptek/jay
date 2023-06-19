@@ -24,11 +24,10 @@ clean:
 	docker system prune --force --volumes
 
 bang:
-	make tests
 	make image
 	make push
 
-tests: Makefile jay/*.janet test/*.janet
+smoke: Makefile jay/*.janet test/*.janet
 	make install
 	jpm $(opts) test
 
