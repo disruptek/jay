@@ -1,13 +1,18 @@
 (import spork/base64)
 (import curl)
 
-(defn default-credentials
+(varfn default-credentials
   `recover a default set of credentials from the process environment`
   []
-  @{:aws-access-key-id (os/getenv "AWS_ACCESS_KEY_ID")
-    :aws-secret-access-key (os/getenv "AWS_SECRET_ACCESS_KEY")
-    :aws-account-id (os/getenv "AWS_ACCOUNT_ID")
-    :aws-region (os/getenv "AWS_REGION")})
+  (let [creds @{:aws-access-key-id (os/getenv "AWS_ACCESS_KEY_ID")
+                :aws-secret-access-key (os/getenv "AWS_SECRET_ACCESS_KEY")
+                :aws-account-id (os/getenv "AWS_ACCOUNT_ID")
+                :aws-region (os/getenv "AWS_REGION")}]
+    (unless (creds :aws-account-id)
+      (error "AWS_ACCOUNT_ID not set"))
+    (unless (creds :aws-region)
+      (error "AWS_REGION not set"))
+    creds))
 
 (defn set-credentials
   `set the credentials to the given table with keys
@@ -17,8 +22,9 @@
   (let [current (dyn :aws-credentials @{})]
     (setdyn :aws-credentials (merge current creds))))
 
-(defn get-credentials []
+(varfn get-credentials
   `get the credentials, setting them to the defaults if necessary`
+  []
   (var creds (dyn :aws-credentials @{}))
   (if (empty? creds)
     (set creds (set-credentials))
@@ -26,11 +32,13 @@
 
 (defn get-region
   `recover the current region from the credentials`
-  [] ((get-credentials) :aws-region))
+  []
+  ((get-credentials) :aws-region))
 
 (defn get-account-id
   `recover the current account-id from the credentials`
-  [] ((get-credentials) :aws-account-id))
+  []
+  ((get-credentials) :aws-account-id))
 
 (defn explode-arn
   `decompose an arn into its parts`
@@ -100,21 +108,20 @@
   [payload &named headers url]
   (unless (string? payload)
     (error "payload must be a string"))
-
   # probably a fair assumption; i'm too lazy to omit
   # the headers argument from the set-opt call later
   (def headers (or headers ["content-type: application/json"]))
-
   (var body (buffer/new 0))
   (defn eat-body [data] (set body (buffer/push body data)))
-
   (var preamble (buffer/new 1024))
   (defn eat-header
     `callback whatfer accumulating the status and headers`
     [data]
     (buffer/push preamble data))
-
   (def creds (get-credentials))
+  (unless (and (creds :aws-access-key-id)
+               (creds :aws-secret-access-key))
+    (break {:error "missing aws credentials"}))
   (def handle (curl/easy/init))
   (:setopt handle
            :url url
@@ -136,7 +143,7 @@
   (match (:perform handle)
     0
     (let [{:status status :message message :headers headers}
-           (parse-preamble preamble)]
+          (parse-preamble preamble)]
       {:ok {:status status :message message :headers headers :body body}})
     code
     {:error (curl/easy/strerror code)}))

@@ -19,7 +19,8 @@
 (defn encode-json [value] (json/encode (encode value)))
 (defn decode-json [value] (decode (json/decode value)))
 
-(defn jay-arn []
+(defn jay-arn
+  []
   (string/format "arn:aws:lambda:%s:%s:function:jay"
                  (aws/get-region) (aws/get-account-id)))
 
